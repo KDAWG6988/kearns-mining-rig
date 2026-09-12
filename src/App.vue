@@ -12,6 +12,10 @@
           <span class="stat-value">{{ Math.floor(ore) }}</span>
         </div>
         <div class="stat">
+          <span class="stat-label">Ore in Bank:</span>
+          <span class="stat-value">{{ Math.floor(bankBalance) }}</span>
+        </div>
+        <div class="stat">
           <span class="stat-label">Mining Rate:</span>
           <span class="stat-value">{{ miningRate.toFixed(2) }}/s</span>
         </div>
@@ -19,6 +23,18 @@
           <span class="stat-label">Level:</span>
           <span class="stat-value">{{ level }}</span>
         </div>
+      </div>
+
+      <div class="banking-area">
+        <div class="bank-controls">
+          <button @click="depositOre" class="bank-btn deposit-btn" :disabled="ore <= 0">
+            🏦 Deposit Ore
+          </button>
+          <button @click="withdrawOre" class="bank-btn withdraw-btn" :disabled="bankBalance <= 0">
+            💰 Withdraw Ore
+          </button>
+        </div>
+        <p class="bank-info" v-if="lastTransaction">{{ lastTransaction }}</p>
       </div>
 
       <div class="mining-area">
@@ -65,10 +81,12 @@ export default {
   data() {
     return {
       ore: 0,
+      bankBalance: 0,
       mineAmount: 1,
       miningRate: 0,
       level: 1,
       lastSaved: new Date().toLocaleTimeString(),
+      lastTransaction: '',
       upgrades: [
         {
           id: 1,
@@ -128,6 +146,28 @@ export default {
       this.updateLevel()
       this.saveProgress()
     },
+    depositOre() {
+      if (this.ore > 0) {
+        const depositAmount = Math.floor(this.ore)
+        this.bankBalance += depositAmount
+        this.ore = 0
+        this.lastTransaction = `✅ Deposited ${depositAmount} ore to bank`
+        this.updateLevel()
+        this.saveProgress()
+        this.clearTransactionMessage()
+      }
+    },
+    withdrawOre() {
+      if (this.bankBalance > 0) {
+        const withdrawAmount = Math.floor(this.bankBalance)
+        this.ore += withdrawAmount
+        this.bankBalance = 0
+        this.lastTransaction = `✅ Withdrew ${withdrawAmount} ore from bank`
+        this.updateLevel()
+        this.saveProgress()
+        this.clearTransactionMessage()
+      }
+    },
     buyUpgrade(upgradeId) {
       const upgrade = this.upgrades.find(u => u.id === upgradeId)
       if (upgrade && this.ore >= upgrade.cost) {
@@ -140,14 +180,47 @@ export default {
       }
     },
     updateLevel() {
-      this.level = Math.floor(this.ore / 100) + 1
+      this.level = Math.floor((this.ore + this.bankBalance) / 100) + 1
     },
     saveProgress() {
       this.lastSaved = new Date().toLocaleTimeString()
-      // TODO: Implement localStorage save
+      // Store game state in localStorage
+      const gameState = {
+        ore: this.ore,
+        bankBalance: this.bankBalance,
+        mineAmount: this.mineAmount,
+        miningRate: this.miningRate,
+        level: this.level,
+        upgrades: this.upgrades
+      }
+      localStorage.setItem('miningRigProgress', JSON.stringify(gameState))
+    },
+    loadProgress() {
+      const saved = localStorage.getItem('miningRigProgress')
+      if (saved) {
+        const gameState = JSON.parse(saved)
+        this.ore = gameState.ore || 0
+        this.bankBalance = gameState.bankBalance || 0
+        this.mineAmount = gameState.mineAmount || 1
+        this.miningRate = gameState.miningRate || 0
+        this.level = gameState.level || 1
+        if (gameState.upgrades) {
+          this.upgrades = gameState.upgrades
+        }
+        this.lastTransaction = '📂 Progress loaded from save'
+        this.clearTransactionMessage()
+      }
+    },
+    clearTransactionMessage() {
+      setTimeout(() => {
+        this.lastTransaction = ''
+      }, 3000)
     }
   },
   mounted() {
+    // Load saved progress
+    this.loadProgress()
+
     // Auto-mining loop
     setInterval(() => {
       this.ore += this.miningRate / 10
@@ -238,11 +311,68 @@ export default {
   color: #667eea;
 }
 
+.banking-area {
+  background: white;
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  border-left: 4px solid #f5576c;
+}
+
+.bank-controls {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.bank-btn {
+  flex: 1;
+  padding: 1rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+  color: white;
+}
+
+.deposit-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.deposit-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(102, 126, 234, 0.4);
+}
+
+.withdraw-btn {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.withdraw-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(245, 87, 108, 0.4);
+}
+
+.bank-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.bank-info {
+  font-size: 0.95rem;
+  color: #667eea;
+  font-weight: bold;
+  text-align: center;
+}
+
 .mining-area {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin: 3rem 0;
+  margin: 2rem 0;
   gap: 1rem;
 }
 
@@ -381,6 +511,10 @@ export default {
 
   .upgrades-grid {
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+
+  .bank-controls {
+    flex-direction: column;
   }
 }
 </style>
