@@ -1,0 +1,28 @@
+{
+  "name": "kearns-mining-rig",
+  "version": "1.0.0",
+  "description": "A tap-to-mine incremental/idle game",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "start": "npm run dev"
+  },
+  "keywords": [
+    "game",
+    "idle",
+    "incremental",
+    "tap-to-mine",
+    "mining"
+  ],
+  "author": "KDAWG6988",
+  "license": "MIT",
+  "devDependencies": {
+    "vite": "^5.0.0",
+    "@vitejs/plugin-vue": "^5.0.0"
+  },
+  "dependencies": {
+    "vue": "^3.3.0"
+  }
+}
