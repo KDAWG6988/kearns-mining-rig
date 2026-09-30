@@ -1,3 +1,7 @@
+<script setup>
+import { Analytics } from '@vercel/analytics/vue';
+</script>
+
 <template>
   <div id="app" class="game-container">
     <header class="game-header">
@@ -85,23 +89,23 @@
         <div class="withdrawal-section">
           <h3>Withdraw Bitcoin</h3>
           <p v-if="withdrawBalance <= 0" class="warning">Minimum balance: 0.001 BTC</p>
-          <input 
-            v-else
-            v-model.number="withdrawAmount" 
-            type="number" 
-            placeholder="Amount (BTC)"
-            :max="withdrawBalance"
-            step="0.001"
-          >
-          <input v-else v-model="btcWallet" placeholder="Your Bitcoin wallet address">
-          <button 
-            v-if="withdrawBalance > 0"
-            @click="withdrawBitcoin" 
-            :disabled="withdrawAmount <= 0 || !btcWallet"
-            class="buy-btn"
-          >
-            Withdraw {{ withdrawAmount }} BTC
-          </button>
+          <template v-else>
+            <input 
+              v-model.number="withdrawAmount" 
+              type="number" 
+              placeholder="Amount (BTC)"
+              :max="withdrawBalance"
+              step="0.001"
+            >
+            <input v-model="btcWallet" placeholder="Your Bitcoin wallet address">
+            <button 
+              @click="withdrawBitcoin" 
+              :disabled="withdrawAmount <= 0 || !btcWallet"
+              class="buy-btn"
+            >
+              Withdraw {{ withdrawAmount }} BTC
+            </button>
+          </template>
         </div>
 
         <div class="referral-section">
@@ -224,6 +228,7 @@
     <footer class="game-footer">
       <p>Kearns Mining Rig v2.0 Premium | Earn Real Bitcoin | Save Progress: {{ lastSaved }}</p>
     </footer>
+    <Analytics />
   </div>
 </template>
 
