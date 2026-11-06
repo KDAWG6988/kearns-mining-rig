@@ -83,26 +83,30 @@
         </div>
 
         <div class="withdrawal-section">
-          <h3>Withdraw Bitcoin</h3>
-          <p v-if="withdrawBalance <= 0" class="warning">Minimum balance: 0.001 BTC</p>
-          <input 
-            v-else
-            v-model.number="withdrawAmount" 
-            type="number" 
-            placeholder="Amount (BTC)"
-            :max="withdrawBalance"
-            step="0.001"
-          >
-          <input v-else v-model="btcWallet" placeholder="Your Bitcoin wallet address">
-          <button 
-            v-if="withdrawBalance > 0"
-            @click="withdrawBitcoin" 
-            :disabled="withdrawAmount <= 0 || !btcWallet"
-            class="buy-btn"
-          >
-            Withdraw {{ withdrawAmount }} BTC
-          </button>
-        </div>
+  <h3>Withdraw Bitcoin</h3>
+  <p v-if="withdrawBalance <= 0" class="warning">Minimum balance: 0.001 BTC</p>
+  <input
+    v-if="withdrawBalance > 0"
+    v-model.number="withdrawAmount"
+    type="number"
+    placeholder="Amount (BTC)"
+    :max="withdrawBalance"
+    step="0.001"
+  >
+  <input
+    v-if="withdrawBalance > 0"
+    v-model="btcWallet"
+    placeholder="Your Bitcoin wallet address"
+  >
+  <button
+    v-if="withdrawBalance > 0"
+    @click="withdrawBitcoin"
+    :disabled="withdrawAmount <= 0 || !btcWallet"
+    class="buy-btn"
+  >
+    Withdraw {{ withdrawAmount }} BTC
+  </button>
+</div>
 
         <div class="referral-section">
           <h3>🔗 Referral Link</h3>
